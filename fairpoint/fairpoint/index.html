@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FairPoint | Campus Student Complaint &amp; Session Management System</title>
+  <meta name="description" content="FairPoint lets students file confidential complaints and track hearing sessions, while the Judicial Admin reviews cases, responds, and schedules sessions.">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===================== AUTHENTICATION ===================== -->
+  <section id="auth-view" class="auth" aria-labelledby="auth-title">
+    <div class="auth__panel">
+      <aside class="auth__brand">
+        <div class="brand brand--stacked">
+          <span class="brand__tile">
+            <img class="brand__logo" src="logo.png" width="360" height="297" alt="">
+          </span>
+          <span class="brand__name">FairPoint</span>
+        </div>
+        <h2>Fair, transparent and confidential.</h2>
+        <p>Campus Student Complaint &amp; Session Management System</p>
+        <ul class="auth__points">
+          <li>File complaints privately. Only the Judicial Admin can see them.</li>
+          <li>Track admin responses and hearing dates in one place.</li>
+          <li>Judicial Admin reviews every case and schedules sessions.</li>
+        </ul>
+      </aside>
+
+      <div class="auth__card">
+        <h1 id="auth-title">Sign in to FairPoint</h1>
+        <p class="muted">Choose your portal to continue.</p>
+
+        <div class="segmented" role="group" aria-label="Choose portal">
+          <button type="button" class="segmented__btn" data-role="student" aria-pressed="true">Student Portal</button>
+          <button type="button" class="segmented__btn" data-role="admin" aria-pressed="false">Judicial Admin Portal</button>
+        </div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="login-id" id="login-id-label">Student ID</label>
+            <input id="login-id" name="id" type="text" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <p id="login-error" class="field__error" role="alert" hidden></p>
+          <button type="submit" class="btn btn--primary btn--block">Sign in</button>
+        </form>
+
+        <div class="notice notice--info">
+          <strong>Prototype demo.</strong> There is no real authentication, so any ID works.
+          Try Student ID <code>2023-1001</code> (has sample cases) or Admin ID <code>ADMIN-001</code>.
+        </div>
+        <button type="button" id="reset-demo" class="link-btn">Reset demo data</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== APP SHELL ===================== -->
+  <div id="app-shell" class="shell" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand__logo" src="logo.png" width="360" height="297" alt="">
+        <span class="brand__text">
+          <span class="brand__name">FairPoint</span>
+          <span class="brand__tag">Student Complaint &amp; Session Management</span>
+        </span>
+      </div>
+      <div class="topbar__user">
+        <span id="role-chip" class="role-chip">Student Portal</span>
+        <div class="user-meta">
+          <strong id="user-name"></strong>
+          <small id="user-id"></small>
+        </div>
+        <button type="button" id="logout-btn" class="btn btn--light">Log out</button>
+      </div>
+    </header>
+
+    <div class="shell__body">
+      <nav id="sidenav" class="sidenav" aria-label="Primary"></nav>
+
+      <main id="main" class="content" tabindex="-1">
+
+        <!-- ---------- Student: File a complaint ---------- -->
+        <section id="view-student-file" class="view" data-view="student-file" hidden aria-labelledby="h-file">
+          <header class="view__head">
+            <h1 id="h-file">File a Complaint</h1>
+            <p class="muted">Share what happened. Your report goes straight to the Judicial Admin.</p>
+          </header>
+
+          <p class="notice notice--lock">
+            <strong>Private and confidential.</strong> Other students cannot see your complaint. Only you and the Judicial Admin can.
+          </p>
+
+          <form id="complaint-form" class="card form" novalidate>
+            <fieldset>
+              <legend>Complainant details</legend>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="f-name">Student name <span class="req" aria-hidden="true">*</span></label>
+                  <input id="f-name" name="complainantName" type="text" autocomplete="name" required>
+                </div>
+                <div class="field">
+                  <label for="f-sid">Student ID</label>
+                  <input id="f-sid" name="studentId" type="text" readonly>
+                  <p class="hint">Linked to your login so only you can track this case.</p>
+                </div>
+                <div class="field">
+                  <label for="f-course">Course <span class="req" aria-hidden="true">*</span></label>
+                  <input id="f-course" name="course" type="text" list="course-list" placeholder="e.g. BSIT" required>
+                </div>
+                <div class="field">
+                  <label for="f-section">Section <span class="req" aria-hidden="true">*</span></label>
+                  <input id="f-section" name="section" type="text" placeholder="e.g. 2B" required>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Respondent details <span class="tag">Optional</span></legend>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="f-rname">Target person's name</label>
+                  <input id="f-rname" name="respName" type="text">
+                </div>
+                <div class="field">
+                  <label for="f-rcourse">Course</label>
+                  <input id="f-rcourse" name="respCourse" type="text" list="course-list">
+                </div>
+                <div class="field">
+                  <label for="f-rsection">Section</label>
+                  <input id="f-rsection" name="respSection" type="text">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Incident details</legend>
+              <div class="field">
+                <label for="f-desc">Complaint description <span class="req" aria-hidden="true">*</span></label>
+                <textarea id="f-desc" name="description" rows="7" maxlength="1500" placeholder="Describe what happened, when and where it happened, and who was involved."></textarea>
+                <p class="hint"><span id="desc-count">0</span> / 1500 characters (minimum 20)</p>
+              </div>
+            </fieldset>
+
+            <div class="form__actions">
+              <button type="reset" class="btn btn--ghost">Clear form</button>
+              <button type="submit" class="btn btn--primary">Submit complaint</button>
+            </div>
+          </form>
+
+          <datalist id="course-list">
+            <option value="BSIT"></option>
+            <option value="BSCS"></option>
+            <option value="BSBA"></option>
+            <option value="BSED"></option>
+            <option value="BSN"></option>
+            <option value="BSCE"></option>
+            <option value="BSHM"></option>
+          </datalist>
+        </section>
+
+        <!-- ---------- Student: Schedule tracker ---------- -->
+        <section id="view-student-tracker" class="view" data-view="student-tracker" hidden aria-labelledby="h-tracker">
+          <header class="view__head">
+            <h1 id="h-tracker">Schedule Tracker</h1>
+            <p class="muted">Follow the status of your complaints, admin responses and hearing dates.</p>
+          </header>
+
+          <div id="tracker-stats" class="stats"></div>
+
+          <h2 class="section-title">Upcoming sessions</h2>
+          <div id="tracker-upcoming" class="upcoming"></div>
+
+          <h2 class="section-title">My complaints</h2>
+          <div id="tracker-list" class="case-list"></div>
+        </section>
+
+        <!-- ---------- Admin: Complaint Review Board ---------- -->
+        <section id="view-admin-board" class="view" data-view="admin-board" hidden aria-labelledby="h-board">
+          <header class="view__head">
+            <h1 id="h-board">Complaint Review Board</h1>
+            <p class="muted">Every complaint submitted across campus, with complainant and respondent details.</p>
+          </header>
+
+          <div id="board-stats" class="stats"></div>
+
+          <div class="card">
+            <div class="toolbar">
+              <div class="field field--inline">
+                <label for="board-search" class="sr-only">Search complaints</label>
+                <input id="board-search" type="search" placeholder="Search by case ID, name, student ID or keyword">
+              </div>
+              <div class="field field--inline">
+                <label for="board-filter" class="sr-only">Filter by status</label>
+                <select id="board-filter"></select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Case</th>
+                    <th scope="col">Complainant</th>
+                    <th scope="col">Respondent</th>
+                    <th scope="col">Incident</th>
+                    <th scope="col">Status &amp; session</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="board-body"></tbody>
+              </table>
+            </div>
+            <p id="board-empty" class="empty" hidden>No complaints match your search or filter.</p>
+          </div>
+        </section>
+
+        <!-- ---------- Admin: Session scheduling ---------- -->
+        <section id="view-admin-scheduler" class="view" data-view="admin-scheduler" hidden aria-labelledby="h-scheduler">
+          <header class="view__head">
+            <h1 id="h-scheduler">Session Scheduling</h1>
+            <p class="muted">Set, update and publish official hearing or talk sessions. Published sessions appear instantly on the student's tracker.</p>
+          </header>
+
+          <form id="session-form" class="card form" novalidate>
+            <h2 id="session-form-title" class="card__title">Set a session</h2>
+            <div class="form-grid">
+              <div class="field field--full">
+                <label for="sch-case">Case <span class="req" aria-hidden="true">*</span></label>
+                <select id="sch-case" name="caseId" required></select>
+              </div>
+              <div class="field">
+                <label for="sch-type">Session type</label>
+                <select id="sch-type" name="type"></select>
+              </div>
+              <div class="field">
+                <label for="sch-date">Date <span class="req" aria-hidden="true">*</span></label>
+                <input id="sch-date" name="date" type="date" required>
+              </div>
+              <div class="field">
+                <label for="sch-time">Time <span class="req" aria-hidden="true">*</span></label>
+                <input id="sch-time" name="time" type="time" required>
+              </div>
+              <div class="field field--full">
+                <label for="sch-venue">Venue <span class="req" aria-hidden="true">*</span></label>
+                <input id="sch-venue" name="venue" type="text" placeholder="e.g. Judicial Office, Admin Building Room 204" required>
+              </div>
+              <div class="field field--full">
+                <label for="sch-notes">Notes for the parties</label>
+                <textarea id="sch-notes" name="notes" rows="3" placeholder="e.g. Bring your valid school ID and any supporting evidence."></textarea>
+              </div>
+            </div>
+            <p id="sch-existing" class="notice notice--info" hidden></p>
+            <div class="form__actions">
+              <button type="button" id="sch-clear" class="btn btn--ghost">Clear</button>
+              <button type="submit" class="btn btn--secondary" data-mode="draft">Save as draft</button>
+              <button type="submit" class="btn btn--primary" data-mode="publish">Publish to student</button>
+            </div>
+          </form>
+
+          <div class="card">
+            <h2 class="card__title">All sessions</h2>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Case</th>
+                    <th scope="col">Student</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Date &amp; time</th>
+                    <th scope="col">Venue</th>
+                    <th scope="col">State</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="session-body"></tbody>
+              </table>
+            </div>
+            <p id="session-empty" class="empty" hidden>No sessions yet. Use the form above to set one.</p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== CASE DIALOG (admin) ===================== -->
+  <dialog id="case-dialog" class="dialog" aria-labelledby="case-dialog-title">
+    <div class="dialog__inner">
+      <header class="dialog__head">
+        <div>
+          <p id="dlg-case-id" class="case-id"></p>
+          <h2 id="case-dialog-title"></h2>
+        </div>
+        <div class="dialog__head-actions">
+          <span id="dlg-status" class="badge"></span>
+          <button type="button" id="dlg-close" class="icon-btn" aria-label="Close case details">&times;</button>
+        </div>
+      </header>
+
+      <div class="dialog__body">
+        <div id="dlg-details"></div>
+
+        <form id="response-form" class="form form--flat" novalidate>
+          <h3>Respond and manage</h3>
+          <div class="field">
+            <label for="resp-text">Response to the student</label>
+            <textarea id="resp-text" name="text" rows="4" placeholder="Type your response or notes. The student will see this on their tracker."></textarea>
+          </div>
+          <div class="field">
+            <label for="resp-status">Case status</label>
+            <select id="resp-status" name="status"></select>
+          </div>
+          <div class="form__actions">
+            <button type="button" id="dlg-schedule" class="btn btn--secondary">Schedule a session</button>
+            <button type="submit" class="btn btn--primary">Send response</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
